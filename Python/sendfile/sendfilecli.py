@@ -36,6 +36,7 @@ numSent = 0
 
 # The file data
 fileData = None
+# print(type(fileData))
 
 # Keep sending until all is sent
 while True:

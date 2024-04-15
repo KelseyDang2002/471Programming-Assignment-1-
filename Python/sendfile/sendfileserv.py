@@ -7,6 +7,7 @@
 
 import socket
 import os
+import tqdm
 
 # The port on which to listen
 listenPort = 1234
@@ -47,6 +48,8 @@ def recvAll(sock, numBytes):
 		
 		# Add the received bytes to the buffer
 		recvBuff += tmpBuff
+
+		progress.update(numBytes)
 	
 	return recvBuff
 		
@@ -71,6 +74,9 @@ while True:
 	
 	# The size of the incoming file
 	fileSize = 0
+
+	# Progress bar
+	progress = tqdm.tqdm(unit="B", unit_scale=True, unit_divisor=1000, total=int(fileSize))
 	
 	# The buffer containing the file size
 	fileSizeBuff = ""
@@ -82,7 +88,7 @@ while True:
 	# Get the file size
 	fileSize = len(fileSizeBuff)
 	
-	print("The file size is ", fileSize)
+	print("\nThe file size is ", fileSize)
 	
 	# Get the file data
 	fileData = recvAll(clientSock, fileSize)

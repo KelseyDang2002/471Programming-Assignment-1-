@@ -8,12 +8,6 @@
 4. Sai chetan Kamisetty, kamisetty@csu.fullerton.edu
 5. Irvin Rafael, irvin999rafael6@csu.fullerton.edu
 
-6. Daniel Garcia, dannygarcia2120@csu.fullerton.edu
-7. Kelsey Dang, kdangdo2002@csu.fullerton.edu
-8. Jacob Corletto, jacob.corletto@csu.fullerton.edu
-9. Sai chetan Kamisetty, kamisetty@csu.fullerton.edu
-10. Irvin Rafael, irvin999rafael6@csu.fullerton.edu
-
 ## Programming Language(s) Used:
 
 1. Python (using sockets and os libraries)

@@ -28,13 +28,13 @@
 4. Starting in the "Server" terminal run the command:
 
 ```console
-$ python3 server.py <port number>
+python3 server.py <port number>
 ```
 
 5. In the "Client" terminal run the command:
 
 ```console
-  $ python3 client.py <server machine> <server port>
+python3 client.py <server machine> <server port>
 ```
 
 ### Program Execution

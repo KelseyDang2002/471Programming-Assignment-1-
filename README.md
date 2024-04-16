@@ -4,7 +4,7 @@
 
 1. Daniel Garcia, dannygarcia2120@csu.fullerton.edu
 2. Kelsey Dang, kdangdo2002@csu.fullerton.edu
-3. Jacob Corletto, [Email]
+3. Jacob Corletto, jacob.corletto@csu.fullerton.edu
 4. Sai chetan Kamisetty, kamisetty@csu.fullerton.edu
 5. Irvin Rafael, irvin999rafael6@csu.fullerton.edu
 

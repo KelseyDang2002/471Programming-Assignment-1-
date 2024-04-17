@@ -41,6 +41,8 @@ While connected to the server database, the client terminal has access to the fo
 - put [file name]
   - Use this command to send a file to the database
   - Use the parameter "file name" to request the file by name (not path)
+- quit
+  - Use this command to disconnect from the server and exit
 
 ## Anything special about submission to take note of:
 

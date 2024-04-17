@@ -12,6 +12,8 @@
 
 1. Python (using sockets and os libraries)
 
+## How to Execute Program:
+
 ### Set Up
 
 1. Start at "project" folder

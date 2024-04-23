@@ -21,9 +21,6 @@ def send_data(sock, data):
     # Add data size string before data
     data = dataSizeStr.encode('utf-8') + data
     numSent = 0
-
-    # Encode data into bytes
-    # data_bytes = data.encode('utf-8')
 	
     # Send all data making sure not to miss any
     while numSent != len(data):
@@ -91,110 +88,109 @@ welcomeSock.listen(1)
 
 # Main loop, looks and keeps track of client socket.
 while True:
-    try:
-        print("Awaiting Connections...")
-        
-        clientSock, addr = welcomeSock.accept()
+    print("Awaiting Connections...")
+    
+    clientSock, addr = welcomeSock.accept()
 
-        print(f"Accepted connect from client: {addr}")
+    print(f"Accepted connect from client: {addr}")
 
-        while True:
-            try:
-                # Get fileSize for command
+    while True:
+        try:
+            # Get fileSize for command
+            fileSize = recvAll(clientSock, 10)
+            # Get Command from fileSize
+            command = recvAll(clientSock, int(fileSize))
+
+            if command.decode('utf-8') == "ls":
+                # Generate and send ephemeral port to server
+                ephSocket = getEphemeralSocket(clientSock)
+                # Get the ls -l of the server file's directory.
+                result = subprocess.run(['ls', '-l', './'], stdout=PIPE, stderr=PIPE, universal_newlines=True).stdout
+                # Send data to the client
+                send_data(ephSocket, result)
+                print("Successfully sent ls -l to client")
+                ephSocket.close()
+            
+            elif command.decode('utf-8') == "get":
+                # Get fileSize for filename
                 fileSize = recvAll(clientSock, 10)
-                # Get Command from fileSize
-                command = recvAll(clientSock, int(fileSize))
+                # Get filname for checks
+                filename = recvAll(clientSock, int(fileSize))
+                filename = filename.decode('utf-8')
+                if not os.path.exists(f"./{filename}") or filename == "server.py":
+                    send_data(clientSock, "NUL")
+                    continue
+                # Generate Ephemeral Socket and wait for connection.
+                ephSocket = getEphemeralSocket(clientSock)
 
-                if command.decode('utf-8') == "ls":
-                    # Get the ls -l of the server file's directory.
-                    result = subprocess.run(['ls', '-l', './'], stdout=PIPE, stderr=PIPE, universal_newlines=True).stdout
-                    # Send data to the client
-                    send_data(clientSock, result)
-                    print("Successfully sent ls -l to client")
-                
-                elif command.decode('utf-8') == "get":
-                    # Get fileSize for filename
-                    fileSize = recvAll(clientSock, 10)
-                    # Get filname for checks
-                    filename = recvAll(clientSock, int(fileSize))
-                    filename = filename.decode('utf-8')
-                    if not os.path.exists(f"./{filename}") or filename == "server.py":
-                        send_data(clientSock, "NUL")
-                        continue
-                    # Generate Ephemeral Socket and wait for connection.
-                    ephSocket = getEphemeralSocket(clientSock)
-
-                    # Open file and send data
-                    try:
-                        # Open file in bytes mode.
-                        file = open(filename, "rb")
-                        b = file.read(1)
-                        bytessent = 0
-
-                        # Send while bytes exist
-                        while b:
-                            send_data(ephSocket, b)
-                            b = file.read(1)
-                            bytessent += 1
-
-                        print(f"SUCCESSS: Sent {bytessent} bytes to client")
-                    except Exception as e:
-                        print(f"Issues opening the file or sending data: {e}")
-                    finally:
-                        # Terminate data connection socket and close file.
-                        ephSocket.close()
-                        file.close()
-
-                elif command.decode('utf-8') == "put":
-                    # Create and send data connection socket to client.
-                    ephSocket = getEphemeralSocket(clientSock)
-
-                    # Get filename from data socket.
-                    fileSize = recvAll(ephSocket, 10)
-                    filename = recvAll(ephSocket, int(fileSize)).decode('utf-8')
-
-                    print(f"Uploading {filename} from the client!")
-                    
+                # Open file and send data
+                try:
                     # Open file in bytes mode.
-                    file = open(filename, "wb")
+                    file = open(filename, "rb")
+                    b = file.read(1)
+                    bytessent = 0
 
-                    bytecount = 0
+                    # Send while bytes exist
+                    while b:
+                        send_data(ephSocket, b)
+                        b = file.read(1)
+                        bytessent += 1
 
-                    while True:
-                        headFileSize = recvAll(ephSocket, 10)
-
-                        # Break if there no more data being sent.
-                        if not headFileSize:
-                            break
-
-                        b = recvAll(ephSocket, int(headFileSize))
-
-                        # Break if there no more data being sent. (double checker)
-                        if not b:
-                            break
-
-                        # Write to file.
-                        file.write(b)
-
-                        bytecount += 1
-
-                    # Close file and terminaate
-                    file.close()
+                    print(f"SUCCESSS: Sent {bytessent} bytes to client")
+                except Exception as e:
+                    print(f"Issues opening the file or sending data: {e}")
+                finally:
+                    # Terminate data connection socket and close file.
                     ephSocket.close()
+                    file.close()
 
-                    print(f"SUCCESS: {bytecount} bytes transfered from client")
+            elif command.decode('utf-8') == "put":
+                # Create and send data connection socket to client.
+                ephSocket = getEphemeralSocket(clientSock)
 
-                elif command.decode('utf-8') == "quit":
-                    clientSock.close()
-                    print(f"Client, {addr} has disconnected.")
-                    break
+                # Get filename from data socket.
+                fileSize = recvAll(ephSocket, 10)
+                filename = recvAll(ephSocket, int(fileSize)).decode('utf-8')
 
-                # This condition shouldn't ever happen, since any 
-                # other command is filtered out at client side.
-                else:
-                    pass
-            except:
+                print(f"Uploading {filename} from the client!")
+                
+                # Open file in bytes mode.
+                file = open(filename, "wb")
+
+                bytecount = 0
+
+                while True:
+                    headFileSize = recvAll(ephSocket, 10)
+
+                    # Break if there no more data being sent.
+                    if not headFileSize:
+                        break
+
+                    b = recvAll(ephSocket, int(headFileSize))
+
+                    # Break if there no more data being sent. (double checker)
+                    if not b:
+                        break
+
+                    # Write to file.
+                    file.write(b)
+
+                    bytecount += 1
+
+                # Close file and terminaate
+                file.close()
+                ephSocket.close()
+
+                print(f"SUCCESS: {bytecount} bytes transfered from client")
+
+            elif command.decode('utf-8') == "quit":
+                clientSock.close()
+                print(f"Client, {addr} has disconnected.")
+                break
+
+            # This condition shouldn't ever happen, since any 
+            # other command is filtered out at client side.
+            else:
                 pass
-    except KeyboardInterrupt:
-        print("Server stopped by user.")
-        break
+        except:
+            pass

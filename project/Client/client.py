@@ -79,9 +79,22 @@ while True:
     # ls Command
     if split_arg[0] == "ls":
         send_data(connSock, 'ls')
+        
+        # Receive Ephermal Socket
         filesize = recvAll(connSock, 10)
         lsStr = recvAll(connSock, int(filesize))
+        
+        # Connect to Ephermal Port for data transfer
+        dataSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        dataSock.connect((server_machine, int(ephSocket.decode('utf-8'))))
+        
+        # Receive this ls string from server
+        filesize = recvAll(dataSock, 10)
+        lsStr = recvAll(dataSock, int(filesize))
         print(lsStr.decode('utf-8'))
+        
+        dataSock.close()
+    
     # get Command
     elif split_arg[0] == "get":
 

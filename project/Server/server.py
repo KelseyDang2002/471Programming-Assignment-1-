@@ -21,7 +21,7 @@ def send_data(sock, data):
     # Add data size string before data
     data = dataSizeStr.encode('utf-8') + data
     numSent = 0
-	
+
     # Send all data making sure not to miss any
     while numSent != len(data):
 	    numSent += sock.send(data[numSent:])
@@ -102,7 +102,6 @@ while True:
             command = recvAll(clientSock, int(fileSize))
 
             if command.decode('utf-8') == "ls":
-                # Generate and send ephemeral port to server
                 ephSocket = getEphemeralSocket(clientSock)
                 # Get the ls -l of the server file's directory.
                 result = subprocess.run(['ls', '-l', './'], stdout=PIPE, stderr=PIPE, universal_newlines=True).stdout
